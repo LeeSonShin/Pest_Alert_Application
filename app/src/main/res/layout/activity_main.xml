@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="해충 탐지 시스템"
+        android:textSize="47sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnBluetoothOn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:text="블루투스 ON"
+        app:layout_constraintStart_toStartOf="@+id/appTitle"
+        app:layout_constraintTop_toBottomOf="@+id/appTitle" />
+
+    <Button
+        android:id="@+id/btnBluetoothOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        android:text="블루투스 OFF"
+        app:layout_constraintEnd_toEndOf="@+id/appTitle"
+        app:layout_constraintTop_toBottomOf="@+id/appTitle" />
+
+    <TextView
+        android:id="@+id/tvBluetoothStatus"
+        android:layout_width="170dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="20dp"
+        android:text="블루투스 연결 상태"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/btnBluetoothOn"
+        app:layout_constraintTop_toBottomOf="@+id/btnBluetoothOn" />
+
+    <Button
+        android:id="@+id/btnConnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="연결하기"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tvBluetoothStatus"
+        app:layout_constraintTop_toBottomOf="@+id/tvBluetoothStatus" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/border"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnConnect">
+
+        <TextView
+            android:id="@+id/tvReceiveData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
