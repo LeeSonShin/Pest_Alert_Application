@@ -149,14 +149,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     switch (result.getResultCode()) {
-                        case BT_REQUEST_ENABLE:
-                            if (result.getResultCode() == RESULT_OK) { // 블루투스 활성화를 확인을 클릭하였다면
-                                Toast.makeText(getApplicationContext(), "블루투스 활성화", Toast.LENGTH_LONG).show();
-                                mTvBluetoothStatus.setText("블루투스 : 활성화");
-                            } else if (result.getResultCode() == RESULT_CANCELED) { // 블루투스 활성화를 취소를 클릭하였다면
-                                Toast.makeText(getApplicationContext(), "취소", Toast.LENGTH_LONG).show();
-                                mTvBluetoothStatus.setText("블루투스 : 비활성화");
-                            }
+                        case RESULT_OK:
+                            Toast.makeText(getApplicationContext(), "블루투스 활성화", Toast.LENGTH_LONG).show();
+                            mTvBluetoothStatus.setText("블루투스 : 활성화");
+                            break;
+                        case RESULT_CANCELED:
+                            Toast.makeText(getApplicationContext(), "취소", Toast.LENGTH_LONG).show();
+                            mTvBluetoothStatus.setText("블루투스 : 비활성화");
                             break;
                     }
                 }
@@ -263,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (mBluetoothAdapter.isEnabled()) {
                 Toast.makeText(getApplicationContext(), "블루투스가 이미 활성화 되어 있습니다.", Toast.LENGTH_LONG).show();
-                mTvBluetoothStatus.setText("활성화");
+                mTvBluetoothStatus.setText("블루투스 : 활성화");
             } else {
                 version();
                 //Intent intentBluetoothEnable = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
