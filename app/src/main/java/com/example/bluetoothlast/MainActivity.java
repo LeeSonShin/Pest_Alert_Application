@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -50,13 +51,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "notification_channel";
     private NotificationManager mNotificationManager;
     private static final int NOTIFICATION_ID = 0;
-
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
     TextView mTvBluetoothStatus;
     TextView mTvReceiveData;
     Button mBtnBluetoothOn;
@@ -83,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // SharedPreferences 초기화
+        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
         checkpermission();
         mTvBluetoothStatus = (TextView) findViewById(R.id.tvBluetoothStatus);
@@ -121,11 +128,16 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     String time = getTime();
-                    String currentText = mTvReceiveData.getText().toString();
-                    String combinedText = time + " : " + readMessage + "\n" + currentText;
-                    mTvReceiveData.setText(combinedText);
-                    createNotificationChannel();
-                    sendNotification();
+
+                    String myMessage = returnString(readMessage);
+
+                    if (myMessage != "none") {
+                        String currentText = mTvReceiveData.getText().toString();
+                        String combinedText = time + " : " + myMessage + "\n" + currentText;
+                        mTvReceiveData.setText(combinedText);
+                        createNotificationChannel();
+                        sendNotification(Integer.parseInt(String.valueOf(readMessage.charAt(0))), myMessage);
+                    }
                 }
             }
         };
@@ -151,6 +163,35 @@ public class MainActivity extends AppCompatActivity {
             }
     ) ;
 
+    private String returnString(String msg) {
+        int number = 3;
+        String myString = "none";
+        try{
+            number = Integer.parseInt(String.valueOf(msg.charAt(0)));
+        }
+        catch (NumberFormatException ex){
+            ex.printStackTrace();
+        }
+        switch (number) {
+            case 0: myString = "bee";
+            break;
+            case 1: myString = "butterfly";
+            break;
+            case 2: myString = "moth";
+            break;
+            case 3: myString = "none";
+            break;
+            case 4: myString = "stink";
+            break;
+        }
+        return myString;
+    }
+    // 마지막 알람 보낸 시간을 저장하는 메소드
+    private void saveLastNotificationTime(int i, long time) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("lastNotificationTime" + i, time);
+        editor.apply();
+    }
     private String getTime() {
         long now = System.currentTimeMillis();
         Date date = new Date(now);
@@ -171,17 +212,28 @@ public class MainActivity extends AppCompatActivity {
             mNotificationManager.createNotificationChannel(notificationChannel);
         }
     }
-    private NotificationCompat.Builder getNotificationBuilder() {
+    private NotificationCompat.Builder getNotificationBuilder(String msg) {
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Notified!")
-                .setContentText("Insect notification!!")
+                .setContentTitle("Notified!\n")
+                .setContentText("Detected "+ msg)
                 .setSmallIcon(R.drawable.ic_android);
         return notifyBuilder;
     }
 
-    public void sendNotification() {
-        NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
-        mNotificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+    public void sendNotification(int i, String message) {
+        // SharedPreferences에서 마지막 알람 보낸 시간을 가져옴
+        long lastNotificationTime = sharedPreferences.getLong("lastNotificationTime" + i, 0);
+
+        // 현재 시간을 가져옴
+        long currentTimeMillis = System.currentTimeMillis();
+        // 30분(1800000 밀리초) 이상 경과한 경우에만 알람을 보냄
+        if (currentTimeMillis - lastNotificationTime >= 60000) {
+            // 알람 보내는 코드                            1800000 - 30분
+            NotificationCompat.Builder notifyBuilder = getNotificationBuilder(message);
+            mNotificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+            // 알람을 보낸 시간을 저장
+            saveLastNotificationTime(i, currentTimeMillis);
+        }
     }
 
     public void checkpermission() {
