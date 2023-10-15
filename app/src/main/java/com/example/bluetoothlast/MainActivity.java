@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     Button mBtnBluetoothOn;
     Button mBtnBluetoothOff;
     Button mBtnConnect;
+    Button mBtnClear;
 
     BluetoothAdapter mBluetoothAdapter;
     Set<BluetoothDevice> mPairedDevices;
@@ -74,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
     ConnectedBluetoothThread mThreadConnectedBluetooth;
     BluetoothDevice mBluetoothDevice;
     BluetoothSocket mBluetoothSocket;
+
+    int count = 0;
+    String last_Str = "";
+    String combinedText = "";
 
     final static int BT_REQUEST_ENABLE = 1;
     final static int BT_MESSAGE_READ = 2;
@@ -97,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         mBtnBluetoothOn = (Button) findViewById(R.id.btnBluetoothOn);
         mBtnBluetoothOff = (Button) findViewById(R.id.btnBluetoothOff);
         mBtnConnect = (Button) findViewById(R.id.btnConnect);
+        mBtnClear = (Button) findViewById(R.id.btnClear);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         mBtnBluetoothOn.setOnClickListener(new Button.OnClickListener() {
@@ -118,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mBtnClear.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bluetoothClear();
+            }
+        });
+
         mBluetoothHandler = new Handler(Looper.getMainLooper()) {
             public void handleMessage(Message msg) {
                 if (msg.what == BT_MESSAGE_READ) {
@@ -128,15 +141,21 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     String time = getTime();
-
+                    if(last_Str == readMessage) {
+                        count++;
+                    }
                     String myMessage = returnString(readMessage);
 
                     if (myMessage != "none") {
-                        String currentText = mTvReceiveData.getText().toString();
-                        String combinedText = time + " : " + myMessage + "\n" + currentText;
-                        mTvReceiveData.setText(combinedText);
-                        createNotificationChannel();
-                        sendNotification(Integer.parseInt(String.valueOf(readMessage.charAt(0))), myMessage);
+                        if(count >= 4) {
+                            String currentText = mTvReceiveData.getText().toString();
+                            combinedText = time + " : " + myMessage + "\n" + currentText;
+                            mTvReceiveData.setText(combinedText);
+                            createNotificationChannel();
+                            sendNotification(Integer.parseInt(String.valueOf(readMessage.charAt(0))), myMessage);
+                            count = 0;
+                        }
+                        last_Str = readMessage;
                     }
                 }
             }
@@ -256,6 +275,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void bluetoothClear() {
+        combinedText = "";
+    }
+
     void bluetoothOn() {
         if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_LONG).show();
@@ -265,8 +288,6 @@ public class MainActivity extends AppCompatActivity {
                 mTvBluetoothStatus.setText("블루투스 : 활성화");
             } else {
                 version();
-                //Intent intentBluetoothEnable = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                //startActivityForResult(intentBluetoothEnable, BT_REQUEST_ENABLE);
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 ARLauncher.launch(intent);
             }

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="해충 탐지 시스템"
-        android:textSize="47sp"
+        android:textSize="48sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,8 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:text="블루투스 켜기"
         android:textSize="18sp"
-        android:text="블루투스 ON"
         app:layout_constraintStart_toStartOf="@+id/appTitle"
         app:layout_constraintTop_toBottomOf="@+id/appTitle" />
 
@@ -32,8 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:text="블루투스 끄기"
         android:textSize="18sp"
-        android:text="블루투스 OFF"
         app:layout_constraintEnd_toEndOf="@+id/appTitle"
         app:layout_constraintTop_toBottomOf="@+id/appTitle" />
 
@@ -58,7 +58,18 @@
         app:layout_constraintTop_toBottomOf="@+id/tvBluetoothStatus" />
 
 
+    <Button
+        android:id="@+id/btnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로그 삭제"
+        android:layout_marginTop="20dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnBluetoothOff"
+        app:layout_constraintTop_toBottomOf="@+id/tvBluetoothStatus" />
+
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="12dp"
