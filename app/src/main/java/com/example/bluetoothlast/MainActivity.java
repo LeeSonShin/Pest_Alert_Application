@@ -2,21 +2,17 @@ package com.example.bluetoothlast;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Bundle;
@@ -24,11 +20,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-//import android.support.v7.app.AlertDialog;
-//import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +31,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
@@ -51,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -86,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
 
     final static UUID BT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    final private String[] permissions = {
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.POST_NOTIFICATIONS
+    };
+
     @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +93,8 @@ public class MainActivity extends AppCompatActivity {
         // SharedPreferences 초기화
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         editor = sharedPreferences.edit();
-
-        checkpermission();
+        requestPermissions();
+        //checkmyPermission();
         mTvBluetoothStatus = (TextView) findViewById(R.id.tvBluetoothStatus);
         mTvReceiveData = (TextView) findViewById(R.id.tvReceiveData);
         mBtnBluetoothOn = (Button) findViewById(R.id.btnBluetoothOn);
@@ -141,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     String time = getTime();
-                    if(last_Str == readMessage) {
+                    if(last_Str.equals(readMessage)) {
                         count++;
                     }
                     String myMessage = returnString(readMessage);
@@ -160,6 +158,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    public void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            List<String> notGrantedPermissions = new ArrayList<>();
+
+            for (String permission : permissions) {
+                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    notGrantedPermissions.add(permission);
+                }
+            }
+
+            if (!notGrantedPermissions.isEmpty()) {
+                // 아직 부여되지 않은 권한이 있으므로 권한 요청 대화상자 표시
+                ActivityCompat.requestPermissions(this, notGrantedPermissions.toArray(new String[0]), BT_REQUEST_ENABLE);
+            }
+        }
     }
 
     ActivityResultLauncher<Intent> ARLauncher = registerForActivityResult(
@@ -214,9 +229,7 @@ public class MainActivity extends AppCompatActivity {
         long now = System.currentTimeMillis();
         Date date = new Date(now);
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
-        String getTime = dateFormat.format(date);
-
-        return getTime;
+        return dateFormat.format(date);
     }
     public void createNotificationChannel() {
         mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -254,27 +267,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void checkpermission() {
-        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, BT_REQUEST_ENABLE);
-    }
-    void version() {
-        if(VERSION.SDK_INT >= 31) {
-            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, BT_REQUEST_ENABLE);
-            }
-            if (checkSelfPermission(Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_SCAN}, BT_REQUEST_ENABLE);
-            }
-            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, BT_REQUEST_ENABLE);
-            }
-        } else {
-            if (checkSelfPermission(android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.BLUETOOTH}, BT_REQUEST_ENABLE);
-            }
-        }
-    }
-
     void bluetoothClear() {
         combinedText = "";
     }
@@ -287,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "블루투스가 이미 활성화 되어 있습니다.", Toast.LENGTH_LONG).show();
                 mTvBluetoothStatus.setText("블루투스 : 활성화");
             } else {
-                version();
+                requestPermissions();
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 ARLauncher.launch(intent);
             }
@@ -297,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     void bluetoothOff() {
         if (mBluetoothAdapter.isEnabled()) {
-            version();
+            requestPermissions();
             mBluetoothAdapter.disable();
             Toast.makeText(getApplicationContext(), "블루투스가 비활성화 되었습니다.", Toast.LENGTH_SHORT).show();
             mTvBluetoothStatus.setText("블루투스 : 비활성화");
@@ -310,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     void listPairedDevices() {
         if (mBluetoothAdapter.isEnabled()) {
-            version();
+            requestPermissions();
             mPairedDevices = mBluetoothAdapter.getBondedDevices();
 
             if (mPairedDevices.size() > 0) {
@@ -344,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     void connectSelectedDevice(String selectedDeviceName) {
         for (BluetoothDevice tempDevice : mPairedDevices) {
-            version();
+            requestPermissions();
             if (selectedDeviceName.equals(tempDevice.getName())) {
                 mBluetoothDevice = tempDevice;
                 break;
