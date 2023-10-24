@@ -94,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         editor = sharedPreferences.edit();
         requestPermissions();
-        //checkmyPermission();
         mTvBluetoothStatus = (TextView) findViewById(R.id.tvBluetoothStatus);
         mTvReceiveData = (TextView) findViewById(R.id.tvReceiveData);
         mBtnBluetoothOn = (Button) findViewById(R.id.btnBluetoothOn);
@@ -312,7 +311,6 @@ public class MainActivity extends AppCompatActivity {
                 mListPairedDevices = new ArrayList<String>();
                 for (BluetoothDevice device : mPairedDevices) {
                     mListPairedDevices.add(device.getName());
-                    //mListPairedDevices.add(device.getName() + "\n" + device.getAddress());
                 }
                 final CharSequence[] items = mListPairedDevices.toArray(new CharSequence[mListPairedDevices.size()]);
                 mListPairedDevices.toArray(new CharSequence[mListPairedDevices.size()]);
